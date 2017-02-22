@@ -1,8 +1,8 @@
 enablePlugins(JavaAppPackaging)
 
-organization := "io.forward"
+organization := "se.sadhal"
 
-name := "activator-akka-http"
+name := "contacts-akka-http"
 
 version := "1.0"
 
@@ -20,6 +20,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http-spray-json-experimental"    % akkaV,
     "com.typesafe.akka" %% "akka-http-testkit-experimental"       % "2.4.2-RC3",
     "com.google.inject"  % "guice"                                % "4.1.0",
-    "org.scalatest"     %% "scalatest"                            % scalaTestV % "test"
+    "org.scalatest"     %% "scalatest"                            % scalaTestV % "test",
+    "org.mongodb.scala" %% "mongo-scala-driver"                   % "1.2.1"
   )
 }

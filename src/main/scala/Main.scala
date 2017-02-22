@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import com.google.inject.Guice
 import service.health._
-import service.users.{UserService, UserServiceModule}
+import service.users.{UserRepositoryMongodb, UserService, UserServiceModule}
 
 object Main extends App with HealthRoutes {
   
@@ -19,8 +19,9 @@ object Main extends App with HealthRoutes {
   val logger = Logging(system, getClass)
 
   /** Use Guice for Dependency Injection. Remove if not required */
-  private val injector = Guice.createInjector(UserServiceModule)
-  private val userService = injector.getInstance(classOf[UserService])
+  //private val injector = Guice.createInjector(UserServiceModule)
+  //private val userService = injector.getInstance(classOf[UserService])
+  private val userService = new UserService(UserRepositoryMongodb())
   
   val routes = logRequestResult("", InfoLevel)(userService.userRoutes ~ healthRoutes)
 

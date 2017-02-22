@@ -15,7 +15,7 @@ class UserService @Inject()(userRepository: UserRepository) extends DefaultJsonP
         complete(userRepository.getUsers)
       }
     } ~
-      path("users" / IntNumber) { id =>
+      path("users" / Segment) { id =>
         complete(userRepository.getUser(id))
       }
 }
