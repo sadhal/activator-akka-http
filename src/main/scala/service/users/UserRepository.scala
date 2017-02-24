@@ -5,7 +5,7 @@ import java.util.Date
 import scala.concurrent.Future
 
 trait UserRepository {
-  def getUsers: Future[List[User]]
+  def getUsers: Future[Seq  [User]]
   def getUser(id: String): Future[Option[User]]
 }
 
@@ -16,7 +16,7 @@ final class UserRepositoryImpl extends UserRepository {
     User("1", "Steve", "Jobs", "steve@apple.com", "jobs", new Date())
   )
 
-  def getUsers: Future[List[User]] =
+  def getUsers: Future[Seq[User]] =
     Future.successful(users)
 
   def getUser(id: String): Future[Option[User]] = {

@@ -10,12 +10,12 @@ import spray.json.DefaultJsonProtocol
 class UserService @Inject()(userRepository: UserRepository) extends DefaultJsonProtocol with SprayJsonSupport {
 
   val userRoutes =
-    path("users") {
+    path("personer") {
       get {
         complete(userRepository.getUsers)
       }
     } ~
-      path("users" / Segment) { id =>
+      path("personer" / Segment) { id =>
         complete(userRepository.getUser(id))
       }
 }

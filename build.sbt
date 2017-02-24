@@ -1,4 +1,4 @@
-enablePlugins(JavaAppPackaging)
+enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging)
 
 organization := "se.sadhal"
 
@@ -24,3 +24,34 @@ libraryDependencies ++= {
     "org.mongodb.scala" %% "mongo-scala-driver"                   % "1.2.1"
   )
 }
+
+dockerfile in docker := {
+  val appDir: File = stage.value
+  val targetDir = "/app"
+
+  new Dockerfile {
+    from("java")
+    expose(8778,9000)
+    entryPoint(s"$targetDir/bin/${executableScriptName.value}")
+    copy(appDir, targetDir)
+  }
+}
+
+buildOptions in docker := BuildOptions(
+  cache = false,
+  removeIntermediateContainers = BuildOptions.Remove.Always,
+  pullBaseImage = BuildOptions.Pull.Always
+)
+
+imageNames in docker := Seq(
+  // Sets the latest tag
+  //ImageName(s"${organization.value}/${name.value}:latest"),
+  ImageName(s"172.30.1.1:5000/contacts-be-dev/${name.value}:latest")
+
+  // Sets a name with a tag that contains the project version
+  //ImageName(
+  //  namespace = Some(organization.value),
+  //  repository = name.value,
+   // tag = Some("v" + version.value)
+  //)
+)

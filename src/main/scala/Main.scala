@@ -21,7 +21,7 @@ object Main extends App with HealthRoutes {
   /** Use Guice for Dependency Injection. Remove if not required */
   //private val injector = Guice.createInjector(UserServiceModule)
   //private val userService = injector.getInstance(classOf[UserService])
-  private val userService = new UserService(UserRepositoryMongodb())
+  private val userService = new UserService(UserRepositoryMongodb(ec))
   
   val routes = logRequestResult("", InfoLevel)(userService.userRoutes ~ healthRoutes)
 

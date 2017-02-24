@@ -3,16 +3,20 @@ import java.util
 
 import com.mongodb.async.client.MongoClientSettings
 import org.mongodb.scala.connection.ClusterSettings
+import org.mongodb.scala.bson._
+import org.bson.codecs.configuration.CodecRegistries._
+import org.mongodb.scala.bson.codecs.DocumentCodecProvider
 import org.mongodb.scala.{Document, MongoClient, MongoCredential, MongoDatabase, Observer, ServerAddress}
 
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 
 /**
   * Created by sadmir on 2017-02-20.
   */
-class UserRepositoryMongodb(val db: MongoDatabase) extends UserRepository {
+class UserRepositoryMongodb(val db: MongoDatabase, ec: ExecutionContext) extends UserRepository {
 
   val collection = db.getCollection("personer")
+  implicit val transformer = BsonTransformer
 
   def docToUser(doc: Document): User = {
     val id = if (doc.getObjectId("_id") != null) doc.getObjectId("_id").toString else ""
@@ -24,7 +28,8 @@ class UserRepositoryMongodb(val db: MongoDatabase) extends UserRepository {
     User(id, firstName, lastName, email, twitterHandle, createdOn)
   }
 
-  override def getUsers: Future[List[User]] = {
+  override def getUsers: Future[Seq[User]] = {
+    /*
     val p = Promise[List[User]]()
 
     collection.find().subscribe(new Observer[Document] {
@@ -39,6 +44,10 @@ class UserRepositoryMongodb(val db: MongoDatabase) extends UserRepository {
     })
 
     p.future
+    */
+    implicit val executionContext = ec
+    collection.find().toFuture().map(docs => docs.map(d => docToUser(d)))
+
   }
 
   override def getUser(id: String): Future[Option[User]] = {
@@ -65,7 +74,7 @@ class UserRepositoryMongodb(val db: MongoDatabase) extends UserRepository {
 
 object UserRepositoryMongodb {
 
-  def apply(): UserRepositoryMongodb = new UserRepositoryMongodb(mongo())
+  def apply(ec: ExecutionContext): UserRepositoryMongodb = new UserRepositoryMongodb(mongo(), ec)
 
   private def mongo(): MongoDatabase = {
     val host = System.getenv("MONGODB_SERVICE_HOST")
@@ -76,15 +85,17 @@ object UserRepositoryMongodb {
     val password = orElse[String](System.getenv("MONGODB_PASSWORD"), "sadhal").toCharArray
 
     val mc: MongoCredential = MongoCredential.createCredential(username, dbname, password)
-    
+
     val hsts: util.List[ServerAddress] = new util.ArrayList[ServerAddress]()
     hsts.add(new ServerAddress(host, port))
     val clusterSettings: ClusterSettings = ClusterSettings.builder().hosts(hsts).build()
 
     val credentials: util.List[MongoCredential] = new util.ArrayList[MongoCredential]()
     credentials.add(mc)
+    val codecRegistry = fromProviders(DocumentCodecProvider())
     val settings: MongoClientSettings = MongoClientSettings.builder()
       .clusterSettings(clusterSettings)
+      .codecRegistry(codecRegistry)
       .credentialList(credentials).build()
     val mongoClient: MongoClient = MongoClient(settings)
 
@@ -92,5 +103,5 @@ object UserRepositoryMongodb {
     db
   }
 
-  def orElse[T](value: T, fallbackValue: T): T = if (value != null) value || fallbackValue
+  def orElse[T](value: T, fallbackValue: T): T = if (value != null) value else fallbackValue
 }
