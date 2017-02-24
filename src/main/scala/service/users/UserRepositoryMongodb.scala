@@ -71,13 +71,12 @@ object UserRepositoryMongodb {
     val host = System.getenv("MONGODB_SERVICE_HOST")
     val port = System.getenv("MONGODB_SERVICE_PORT").toInt
 
-    val dbname = System.getenv("MONGODB_DATABASE")
-    val username = System.getenv("MONGODB_USER")
-    val password = System.getenv("MONGODB_PASSWORD").toCharArray
+    val dbname = orElse[String](System.getenv("MONGODB_DATABASE"), "sampledb")
+    val username = orElse[String](System.getenv("MONGODB_USER"), "sadhal")
+    val password = orElse[String](System.getenv("MONGODB_PASSWORD"), "sadhal").toCharArray
 
     val mc: MongoCredential = MongoCredential.createCredential(username, dbname, password)
-    //val clusterSettings: ClusterSettings = ClusterSettings.builder().hosts(List(new ServerAddress(host + ":" + port)))
-
+    
     val hsts: util.List[ServerAddress] = new util.ArrayList[ServerAddress]()
     hsts.add(new ServerAddress(host, port))
     val clusterSettings: ClusterSettings = ClusterSettings.builder().hosts(hsts).build()
@@ -92,4 +91,6 @@ object UserRepositoryMongodb {
     val db: MongoDatabase = mongoClient.getDatabase(dbname)
     db
   }
+
+  def orElse[T](value: T, fallbackValue: T): T = if (value != null) value || fallbackValue
 }
