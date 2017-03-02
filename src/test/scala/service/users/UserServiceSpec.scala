@@ -14,7 +14,7 @@ class UserServiceSpec extends WordSpecLike with Matchers with ScalatestRouteTest
     val repository = new UserRepositoryImpl()
 
     "return a list of users" in {
-      Get("/users") ~> new UserService(repository).userRoutes ~> check {
+      Get("/personer") ~> new UserService(repository).userRoutes ~> check {
         status shouldEqual StatusCodes.OK
         responseAs[List[User]].length shouldBe 2
       }
