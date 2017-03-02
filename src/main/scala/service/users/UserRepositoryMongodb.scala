@@ -2,6 +2,8 @@ package service.users
 import java.util
 
 import com.mongodb.async.client.MongoClientSettings
+import org.bson.codecs.{BsonValueCodecProvider, ValueCodecProvider}
+import org.bson.codecs.configuration.{CodecProvider, CodecRegistries}
 import org.mongodb.scala.connection.ClusterSettings
 import org.mongodb.scala.bson._
 import org.bson.codecs.configuration.CodecRegistries._
@@ -25,7 +27,7 @@ class UserRepositoryMongodb(val db: MongoDatabase, ec: ExecutionContext) extends
     val email = doc.getString("email")
     val twitterHandle = doc.getString("twitterHandle")
     val createdOn = doc.getDate("createdOn")
-    User(id, firstName, lastName, email, twitterHandle, createdOn)
+    User(id, firstName, lastName, email, Option(twitterHandle), createdOn)
   }
 
   override def getUsers: Future[Seq[User]] = {
@@ -51,6 +53,7 @@ class UserRepositoryMongodb(val db: MongoDatabase, ec: ExecutionContext) extends
   }
 
   override def getUser(id: String): Future[Option[User]] = {
+    /*
     val p = Promise[Option[User]]()
 
     import org.mongodb.scala.model.Filters._
@@ -68,6 +71,13 @@ class UserRepositoryMongodb(val db: MongoDatabase, ec: ExecutionContext) extends
     })
 
     p.future
+    */
+    implicit val executionContext = ec
+    import org.mongodb.scala.model.Filters._
+    collection.find(equal("_id", id))
+      .toFuture()
+      .map(docs => docs.map(d => docToUser(d)))
+      .map(seq => seq.headOption)
   }
 
 }
@@ -92,10 +102,20 @@ object UserRepositoryMongodb {
 
     val credentials: util.List[MongoCredential] = new util.ArrayList[MongoCredential]()
     credentials.add(mc)
+
+    val codecProviders: util.List[CodecProvider] = new util.ArrayList[CodecProvider]()
+    codecProviders.add(new ValueCodecProvider())
+    //codecProviders.add(new DocumentCodecProvider())
+    codecProviders.add(new BsonValueCodecProvider())
+    val defaultCodecRegistry = fromProviders(codecProviders)
+
     val codecRegistry = fromProviders(DocumentCodecProvider())
+
+    val codecRegistries = CodecRegistries.fromRegistries(defaultCodecRegistry, codecRegistry)
+
     val settings: MongoClientSettings = MongoClientSettings.builder()
       .clusterSettings(clusterSettings)
-      .codecRegistry(codecRegistry)
+      .codecRegistry(codecRegistries)
       .credentialList(credentials).build()
     val mongoClient: MongoClient = MongoClient(settings)
 

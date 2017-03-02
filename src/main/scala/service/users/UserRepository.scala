@@ -12,8 +12,8 @@ trait UserRepository {
 final class UserRepositoryImpl extends UserRepository {
 
   private val users = List(
-    User("0", "Jack", "Dorsey", "jack@twitter.com", "jack", new Date()),
-    User("1", "Steve", "Jobs", "steve@apple.com", "jobs", new Date())
+    User("0", "Jack", "Dorsey", "jack@twitter.com", Option("jack"), new Date()),
+    User("1", "Steve", "Jobs", "steve@apple.com", Option("jobs"), new Date())
   )
 
   def getUsers: Future[Seq[User]] =

@@ -1,13 +1,9 @@
 enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging)
 
 organization := "se.sadhal"
-
 name := "contacts-akka-http"
-
 version := "1.0"
-
 scalaVersion := "2.11.8"
-
 scalacOptions := Seq("-unchecked", "-feature", "-deprecation", "-encoding", "utf8")
 
 libraryDependencies ++= {
