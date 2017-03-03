@@ -1,7 +1,12 @@
 
 ### Creating app in openshift ###
 
+Choose Add to project, Deploy imagestream.
+
+
+### Test from cURL ###
 ```
-oc new-app ticketfly/scala:sbt-0.13~https://github.com/sadhal/contacts-akka-http.git
-oc expose service contacts-akka-http --path=/personer
+curl -X GET http://172.30.252.240:8778/personer
+
+curl -X POST http://172.30.252.240:8778/personer -H "Content-Type: application/json" -d '{ "firstName":"aaa","lastName":"bbb","email":"aaa@bbb.se","twitterHandle":"akka"}' -v
 ```
